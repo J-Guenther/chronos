@@ -1,0 +1,6 @@
+<mat-toolbar>
+  <span>Chronos</span>
+  <span class="example-spacer"></span>
+  <button mat-flat-button color="primary" *ngIf="!isPresent" (click)="checkIn()">Check-In</button>
+  <button mat-flat-button color="danger" *ngIf="isPresent" (click)="checkOut()">Check-Out</button>
+</mat-toolbar>

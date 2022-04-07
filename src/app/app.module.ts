@@ -10,6 +10,7 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatButtonModule} from "@angular/material/button";
 import {DBConfig, NgxIndexedDBModule} from "ngx-indexed-db";
+import { ClockComponent } from './clock/clock.component';
 
 const dbConfig: DBConfig  = {
   name: 'ChronosTimeTrackingDB',
@@ -29,7 +30,8 @@ const dbConfig: DBConfig  = {
   declarations: [
     AppComponent,
     TimetableComponent,
-    HeaderComponent
+    HeaderComponent,
+    ClockComponent
   ],
   imports: [
     BrowserModule,

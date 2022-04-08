@@ -11,6 +11,11 @@ import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatButtonModule} from "@angular/material/button";
 import {DBConfig, NgxIndexedDBModule} from "ngx-indexed-db";
 import { ClockComponent } from './clock/clock.component';
+import { EditDialogComponent } from './edit-dialog/edit-dialog.component';
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {MatInputModule} from "@angular/material/input";
+import {MatDialogModule} from "@angular/material/dialog";
+import {FormsModule} from "@angular/forms";
 
 const dbConfig: DBConfig  = {
   name: 'ChronosTimeTrackingDB',
@@ -31,7 +36,8 @@ const dbConfig: DBConfig  = {
     AppComponent,
     TimetableComponent,
     HeaderComponent,
-    ClockComponent
+    ClockComponent,
+    EditDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -40,7 +46,11 @@ const dbConfig: DBConfig  = {
     MatIconModule,
     MatToolbarModule,
     MatButtonModule,
-    NgxIndexedDBModule.forRoot(dbConfig)
+    NgxIndexedDBModule.forRoot(dbConfig),
+    MatFormFieldModule,
+    MatInputModule,
+    MatDialogModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

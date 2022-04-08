@@ -3,6 +3,8 @@ import {MatTableDataSource} from "@angular/material/table";
 import {NgxIndexedDBService} from "ngx-indexed-db";
 import * as moment from "moment";
 import {TimeTrackingService} from "../services/time-tracking.service";
+import {MatDialog} from "@angular/material/dialog";
+import {EditDialogComponent} from "../edit-dialog/edit-dialog.component";
 
 export interface Time {
   id?: number
@@ -21,11 +23,14 @@ const TIME_DATA: Time[] = [
 })
 export class TimetableComponent implements OnInit {
 
-  displayedColumns: string[] = ['date', 'checkInTime', 'checkOutTime'];
+  displayedColumns: string[] = ['date', 'checkInTime', 'checkOutTime', 'summe', 'actions'];
   dataSource: MatTableDataSource<Time>;
+  moment: any = moment;
+  currentTime: Time | undefined = undefined;
 
   constructor(private dbService: NgxIndexedDBService,
-              private timeTrackingService: TimeTrackingService) {
+              private timeTrackingService: TimeTrackingService,
+              public dialog: MatDialog) {
     this.dataSource = new MatTableDataSource(TIME_DATA);
   }
 
@@ -40,6 +45,9 @@ export class TimetableComponent implements OnInit {
       if (checkedOut) {
         this.checkOut();
       }
+    });
+    this.timeTrackingService.currentTimeEntry.subscribe(currentTime => {
+      this.currentTime = currentTime;
     });
   }
 
@@ -89,6 +97,23 @@ export class TimetableComponent implements OnInit {
       if (currentTime) {
         this.timeTrackingService.isPresent$.next(true);
       }
+    });
+  }
+
+  openDialog(time: Time): void {
+    const dialogRef = this.dialog.open(EditDialogComponent, {
+      width: '250px',
+      data: time,
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(result)
+      this.dbService
+        .update('timetracking', result)
+        .subscribe((storeData) => {
+          // @ts-ignore
+          this.dataSource.data = storeData;
+        });
     });
   }
 

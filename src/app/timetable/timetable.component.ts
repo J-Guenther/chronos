@@ -1,8 +1,8 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatTableDataSource} from "@angular/material/table";
 import {NgxIndexedDBService} from "ngx-indexed-db";
 import * as moment from "moment";
-import {TimeTrackingService} from "../services/time-tracking.service";
+import {TimeFilter, TimeTrackingService} from "../services/time-tracking.service";
 import {MatDialog} from "@angular/material/dialog";
 import {EditDialogComponent} from "../edit-dialog/edit-dialog.component";
 
@@ -11,6 +11,7 @@ export interface Time {
   date: string;
   checkInTime: string;
   checkOutTime: string;
+  note: string;
 }
 
 const TIME_DATA: Time[] = [
@@ -23,15 +24,24 @@ const TIME_DATA: Time[] = [
 })
 export class TimetableComponent implements OnInit {
 
-  displayedColumns: string[] = ['date', 'checkInTime', 'checkOutTime', 'summe', 'actions'];
+  noFilterColumns: string[] = ['date', 'checkInTime', 'checkOutTime', 'summe', 'note', 'actions'];
+  byNoteFilterColumns: string[] = ['note', 'summe'];
+  byDayFilterColumns: string[] = ['date', 'summe'];
+
   dataSource: MatTableDataSource<Time>;
+  aggregatedByDay: MatTableDataSource<any> | null;
+  aggregatedByNote: MatTableDataSource<any> | null;
   moment: any = moment;
   currentTime: Time | undefined = undefined;
+  currentFilter: TimeFilter = TimeFilter.noFilter;
+  filterEnum = TimeFilter;
 
   constructor(private dbService: NgxIndexedDBService,
               private timeTrackingService: TimeTrackingService,
               public dialog: MatDialog) {
     this.dataSource = new MatTableDataSource(TIME_DATA);
+    this.aggregatedByDay = null;
+    this.aggregatedByNote = null;
   }
 
   ngOnInit(): void {
@@ -49,6 +59,18 @@ export class TimetableComponent implements OnInit {
     this.timeTrackingService.currentTimeEntry.subscribe(currentTime => {
       this.currentTime = currentTime;
     });
+    this.timeTrackingService.timeFilter.subscribe(currentFilter => {
+      this.currentFilter = currentFilter;
+      switch (currentFilter) {
+        case TimeFilter.byDay:
+          this.aggregatedByDay = new MatTableDataSource(this.aggregateByDay());
+          console.log(this.aggregatedByDay);
+          break;
+        case TimeFilter.byNote:
+          this.aggregatedByNote = new MatTableDataSource(this.aggregateByNote());
+          break;
+      }
+    });
   }
 
   checkIn(): void {
@@ -56,7 +78,8 @@ export class TimetableComponent implements OnInit {
       .add('timetracking', {
         date: moment().format('L'),
         checkInTime: moment().format('LTS'),
-        checkOutTime: null
+        checkOutTime: null,
+        note: null
       })
       .subscribe((key) => {
         // @ts-ignore
@@ -107,14 +130,45 @@ export class TimetableComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result)
-      this.dbService
-        .update('timetracking', result)
-        .subscribe((storeData) => {
-          // @ts-ignore
-          this.dataSource.data = storeData;
-        });
+      if (result) {
+        this.dbService
+          .update('timetracking', result)
+          .subscribe((storeData) => {
+            // @ts-ignore
+            this.dataSource.data = storeData;
+          });
+      }
     });
+  }
+
+  aggregateByDay(): Array<any> {
+    const times = this.dataSource.data;
+    const days = new Map();
+    times.forEach(time => {
+      const timeSum = time.checkOutTime ? moment.utc(moment(time.checkOutTime, 'LTS', 'de' ).diff(moment(time.checkInTime, 'LTS', 'de' ))).format('HH:mm:ss') : '00:00:00'
+      if (days.has(time.date)) {
+        const addedTime = moment.duration(timeSum).add(moment.duration(days.get(time.date)))
+        days.set(time.date, moment.utc(addedTime.as('milliseconds')).format('HH:mm:ss'));
+      } else {
+        days.set(time.date, timeSum);
+      }
+    });
+    return Array.from(days, ([name, value]) => ({ name, value }))
+  }
+
+  aggregateByNote(): Array<any> {
+    const times = this.dataSource.data;
+    const notes = new Map();
+    times.forEach(time => {
+      const timeSum = time.checkOutTime ? moment.utc(moment(time.checkOutTime, 'LTS', 'de' ).diff(moment(time.checkInTime, 'LTS', 'de' ))).format('HH:mm:ss') : '00:00:00'
+      if (notes.has(time.note)) {
+        const addedTime = moment.duration(timeSum).add(moment.duration(notes.get(time.note)))
+        notes.set(time.note, moment.utc(addedTime.as('milliseconds')).format('HH:mm:ss'));
+      } else {
+        notes.set(time.note, timeSum);
+      }
+    });
+    return Array.from(notes, ([name, value]) => ({ name, value }))
   }
 
 

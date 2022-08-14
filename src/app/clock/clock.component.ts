@@ -25,13 +25,9 @@ export class ClockComponent implements OnInit {
       this.timeSinceCheckIn = interval(1000).pipe(
         map(() => {
           const diff = moment().diff(moment(this.currentTime?.checkInTime, 'LTS', 'de' ))
-          if ((diff / 1000 / 60 / 60) >= 6) {
-            return moment.utc(diff).subtract(30, 'minutes').format("HH:mm:ss")
-          } else {
             return moment.utc(diff).format("HH:mm:ss")
-          }
         }),
-        distinctUntilChanged()
+        // distinctUntilChanged()
       );
     });
   }

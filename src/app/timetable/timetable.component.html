@@ -1,7 +1,4 @@
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z0">
-
-  <!--- Note that these columns can be defined in any order.
-        The actual rendered columns are set as a property on the row definition" -->
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z0" *ngIf="currentFilter === filterEnum.noFilter">
 
   <ng-container matColumnDef="date">
     <th mat-header-cell *matHeaderCellDef> Datum </th>
@@ -18,6 +15,11 @@
     <td mat-cell *matCellDef="let time"> {{time.checkOutTime}} </td>
   </ng-container>
 
+  <ng-container matColumnDef="note">
+    <th mat-header-cell *matHeaderCellDef> Note </th>
+    <td mat-cell *matCellDef="let time"> {{time.note}} </td>
+  </ng-container>
+
   <ng-container matColumnDef="summe">
     <th mat-header-cell *matHeaderCellDef> Summe </th>
     <td mat-cell *matCellDef="let time"> {{time.checkOutTime ? moment.utc(moment(time.checkOutTime, 'LTS', 'de' ).diff(moment(time.checkInTime, 'LTS', 'de' ))).format("HH:mm:ss") : ""}} </td>
@@ -32,7 +34,39 @@
     </td>
   </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  <tr mat-header-row *matHeaderRowDef="noFilterColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: noFilterColumns;"></tr>
+</table>
+
+<table mat-table [dataSource]="aggregatedByDay" class="mat-elevation-z0" *ngIf="currentFilter === filterEnum.byDay && aggregatedByDay">
+
+  <ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef> Datum </th>
+    <td mat-cell *matCellDef="let time"> {{time.name}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="summe">
+    <th mat-header-cell *matHeaderCellDef> Summe </th>
+    <td mat-cell *matCellDef="let time"> {{time.value}} </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="byDayFilterColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: byDayFilterColumns;"></tr>
+</table>
+
+<table mat-table [dataSource]="aggregatedByNote" class="mat-elevation-z0" *ngIf="currentFilter === filterEnum.byNote && aggregatedByNote">
+
+  <ng-container matColumnDef="note">
+    <th mat-header-cell *matHeaderCellDef> Note </th>
+    <td mat-cell *matCellDef="let time"> {{time.name}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="summe">
+    <th mat-header-cell *matHeaderCellDef> Summe </th>
+    <td mat-cell *matCellDef="let time"> {{time.value}} </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="byNoteFilterColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: byNoteFilterColumns;"></tr>
 </table>
 

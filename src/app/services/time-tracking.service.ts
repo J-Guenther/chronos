@@ -11,12 +11,16 @@ export class TimeTrackingService {
   checkIn = new Subject<boolean>();
   checkOut = new Subject<boolean>();
   currentTimeEntry = new BehaviorSubject<Time | undefined>(undefined);
+  timeFilter = new BehaviorSubject<TimeFilter>(TimeFilter.noFilter);
 
   constructor() {
 
   }
 
+}
 
-
-
+export enum TimeFilter {
+  noFilter,
+  byNote,
+  byDay
 }

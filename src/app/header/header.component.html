@@ -1,6 +1,10 @@
 <mat-toolbar>
   <span>Chronos</span>
   <span class="example-spacer"></span>
+  <button mat-flat-button color="accent" *ngIf="!(currentFilter === filterEnum.byDay)" (click)="changeFilter(filterEnum.byDay)" style="margin-right: 30px">Summary by Date</button>
+  <button mat-flat-button color="accent" *ngIf="!(currentFilter === filterEnum.byNote)" (click)="changeFilter(filterEnum.byNote)">Summary by Note</button>
+  <button mat-flat-button *ngIf="!(currentFilter === filterEnum.noFilter)" (click)="changeFilter(filterEnum.noFilter)" style="margin-left: 30px">Back to Time Table</button>
+  <span class="example-spacer"></span>
   <button mat-flat-button color="primary" *ngIf="!isPresent" (click)="checkIn()">Check-In</button>
-  <button mat-flat-button color="danger" *ngIf="isPresent" (click)="checkOut()">Check-Out</button>
+  <button mat-flat-button color="warn" *ngIf="isPresent" (click)="checkOut()">Check-Out</button>
 </mat-toolbar>
